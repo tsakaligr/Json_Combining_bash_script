@@ -8,7 +8,7 @@
 declare directory="${1}"
 
 declare -a files=()
-readarray -d '' files < <(find "${directory}" -type f -print0 | sort -z)
+readarray -d '' files < <(find "${directory}" -type f -print0 | sort -z | xargs -0 -I % echo % | grep -E '^*.\.json$' | xargs -I % echo -ne '%\0')
 
 # In a given file '[' can be inserted with: sed '1i \['
 echo "["
