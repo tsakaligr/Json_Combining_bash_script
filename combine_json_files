@@ -9,12 +9,15 @@
 #
 # Output: .json file in the stdout 
 
+# Read input arguments
 declare directory="${1}"
 
 main() {
+	# Handle I/O
 	local -a files=()
 	readarray -d '' files < <(collect_json_files "${directory}")
 	
+	# Perfom computation and output
 	combine_json_files_into_list 'files'
 }
 
