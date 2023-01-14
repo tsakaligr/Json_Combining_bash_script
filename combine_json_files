@@ -2,32 +2,52 @@
 
 # This script combines .json files
 #
-# Input [1]: directory with .json files
-# Output: json file in the stdout 
+# Usage: <scipt name> directory
+#
+# Input
+# 	directory: a directory with .json files
+#
+# Output: .json file in the stdout 
 
 declare directory="${1}"
 
-seperate_json_entries() {
-        local -n file_list="${1}"
-
-        for f in "${file_list[@]:0:${#file_list[@]}-1}"; do
-                cat "${f}" | sed '$s/$/,/'
-        done
-
-        if [ "${#file_list[@]}" -gt 0 ]; then
-                cat "${file_list[-1]}" | sed '$s/$//'
-        fi
+main() {
+	local -a files=()
+	readarray -d '' files < <(collect_json_files "${directory}")
+	
+	combine_json_files_into_list 'files'
 }
 
-declare -a files=()
-readarray -d '' files < <(find "${directory}" -maxdepth 1 -mindepth 1 -type f -print0 | sort -z | grep -zIE '^*.\.json$')
+combine_json_files_into_list() {
+	local file_list_name="${1}"
 
-# In a given file '[' can be inserted with: sed '1i \['
-echo "["
+	echo "["
 
-seperate_json_entries 'files'
+	print_comma_seperated_content_of_json_files "${file_list_name}"
 
-# In a given file ']' can be inserted with: sed '$a \]'
-echo "]"
+	echo "]"
+}
+
+print_comma_seperated_content_of_json_files() {
+        local -n file_list="${1}"
+
+	for f in "${file_list[@]:0:${#file_list[@]}-1}"; do
+		cat "${f}" | sed '$s/$/,/'
+	done
+
+	if [ "${#file_list[@]}" -gt 0 ]; then
+		cat "${file_list[-1]}" | sed '$s/$//'
+	fi
+}
+
+collect_json_files() {
+	local directory="${1}"
+
+	find "${directory}" -maxdepth 1 -mindepth 1 -type f -print0 \
+		| sort -z \
+		| grep -zIE '^*.\.json$'
+}
+
+main
 
 exit 0
