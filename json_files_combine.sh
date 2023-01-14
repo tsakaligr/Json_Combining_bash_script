@@ -20,7 +20,7 @@ seperate_json_entries() {
 }
 
 declare -a files=()
-readarray -d '' files < <(find "${directory}" -maxdepth 1 -mindepth 1 -type f -print0 | sort -z | xargs -0 -I % echo % | grep -E '^*.\.json$' | xargs -I % echo -ne '%\0')
+readarray -d '' files < <(find "${directory}" -maxdepth 1 -mindepth 1 -type f -print0 | sort -z | grep -zIE '^*.\.json$')
 
 # In a given file '[' can be inserted with: sed '1i \['
 echo "["
