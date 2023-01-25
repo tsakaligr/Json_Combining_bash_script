@@ -27,6 +27,7 @@ main() {
 
 combine_json_files_into_list() {
 	local file_list_name="${1}"
+        local -n file_list="${1}"
 
 	echo "["
 
@@ -49,6 +50,10 @@ print_comma_seperated_content_of_json_files() {
 
 collect_json_files() {
 	local directory="${1}"
+
+	if [ ! -d "${directory}" ]; then
+		return
+	fi
 
 	find "${directory}" -maxdepth 1 -mindepth 1 -type f -print0 \
 		| sort -z \
