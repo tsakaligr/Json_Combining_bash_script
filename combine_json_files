@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# This script combines .json files
+#
+# Usage: <scipt name> directory
+#
+# Input
+# 	directory: a directory with .json files
+#
+# Output: .json file in the stdout 
+
+set -e
+set -u
+set -o pipefail
+
+# Read input arguments
+declare directory="${1}"
+
+main() {
+	# Handle I/O
+	local -a files=()
+	readarray -d '' files < <(collect_json_files "${directory}")
+	
+	# Perfom computation and output
+	combine_json_files_into_list 'files'
+}
+
+combine_json_files_into_list() {
+	local file_list_name="${1}"
+        local -n file_list="${1}"
+
+	echo "["
+
+	print_comma_seperated_content_of_json_files "${file_list_name}"
+
+	echo "]"
+}
+
+print_comma_seperated_content_of_json_files() {
+        local -n file_list="${1}"
+
+	for f in "${file_list[@]:0:${#file_list[@]}-1}"; do
+		cat "${f}" | sed '$s/$/,/'
+	done
+
+	if [ "${#file_list[@]}" -gt 0 ]; then
+		cat "${file_list[-1]}" | sed '$s/$//'
+	fi
+}
+
+collect_json_files() {
+	local directory="${1}"
+
+	if [ ! -d "${directory}" ]; then
+		return
+	fi
+
+	find "${directory}" -maxdepth 1 -mindepth 1 -type f -print0 \
+		| sort -z \
+		| grep -zIE '^*.\.json$'
+}
+
+main
+
+exit 0
